@@ -77,7 +77,14 @@ The current Twelve Data tracer bullet:
 - reconnects with capped exponential backoff;
 - disconnects while the mobile app is backgrounded and resumes in foreground;
 - redacts the API key from logs;
-- defaults to one AAPL symbol so the public demo path can be verified.
+- subscribes to a credit-safe six-symbol demo catalog.
+
+The Markets demo uses `BTC/USD`, `AAPL`, `TSLA`, `QQQ`, `GLD`, and `USO`.
+Initial snapshots cost six API credits and live streaming costs six WebSocket
+credits, staying below the Basic plan's eight-credit limits. Search and
+categories operate on the in-memory catalog. Sparklines are seeded from each
+real previous-close/current-price pair and extended by WebSocket ticks, so no
+historical-data credits are consumed.
 
 `TWELVE_DATA_API_KEY` is accepted through `--dart-define` for development only.
 Production mobile binaries must receive market data from the StockUBL backend

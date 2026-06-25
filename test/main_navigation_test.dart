@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stockubl/app/config/app_config.dart';
+import 'package:stockubl/app/config/app_config_provider.dart';
+import 'package:stockubl/app/config/environment.dart';
 import 'package:stockubl/app/router/app_router.dart';
 import 'package:stockubl/core/di/external_dependencies.dart';
 
@@ -12,7 +15,12 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [sharedPreferencesProvider.overrideWithValue(preferences)],
+        overrides: [
+          appConfigProvider.overrideWithValue(
+            AppConfig.forEnvironment(AppEnvironment.mock),
+          ),
+          sharedPreferencesProvider.overrideWithValue(preferences),
+        ],
         child: Consumer(
           builder: (context, ref, child) {
             return MaterialApp.router(
@@ -31,7 +39,8 @@ void main() {
 
     await tester.tap(find.text('Markets'));
     await tester.pumpAndSettle();
-    expect(find.text('Explore the markets'), findsOneWidget);
+    expect(find.text('Popular instruments'), findsOneWidget);
+    expect(find.text('Bitcoin'), findsOneWidget);
 
     await tester.tap(find.text('Portfolio'));
     await tester.pumpAndSettle();

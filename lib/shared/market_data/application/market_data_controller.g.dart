@@ -42,7 +42,7 @@ final class MarketDataControllerProvider
 }
 
 String _$marketDataControllerHash() =>
-    r'62d38b09e57e85111f9fc45718a43d0417b4e9b7';
+    r'5bddf2df87d78d480ed9196f140ddc89273db631';
 
 abstract class _$MarketDataController extends $Notifier<MarketDataState> {
   MarketDataState build();

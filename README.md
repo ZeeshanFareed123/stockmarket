@@ -16,6 +16,8 @@ Mobile-first Flutter foundation for a stock-market application.
 - Dio REST networking with redacted request logging
 - Cross-platform WebSocket market-price streaming
 - REST snapshot + live tick coordinator with lifecycle-aware reconnect
+- Real-time Markets screen with BTC/USD, stocks, and ETF instruments
+- Local search/category filtering and tick-driven mini charts
 - Riverpod source generation; Freezed/JSON generation will be added with the
   first API DTOs using versions compatible with the pinned SDK
 - Firebase, push notifications, crash reporting, SSL pinning, REST, and
@@ -47,6 +49,19 @@ API keys are runtime build configuration and must never be committed. A key
 passed with `--dart-define` is still present in the compiled client, so this is
 acceptable only for development. Production will use the backend gateway
 boundary already represented by the `production` environment.
+
+### Basic-plan credit budget
+
+Twelve Data Basic currently provides 8 API credits per minute (800/day) and
+8 trial WebSocket credits. The Markets demo uses:
+
+- 6 REST quote credits when the market engine starts;
+- 6 WebSocket credits for six active symbols;
+- no extra API calls for search or mini charts.
+
+Sparklines start from the real previous-close/current-price pair and grow from
+incoming WebSocket ticks. This keeps the screen real-time without spending
+historical-data credits.
 
 Open the project folder in Android Studio and choose an Android emulator or an
 iOS Simulator. The project is pinned to Flutter 3.41.9 through FVM. If Android

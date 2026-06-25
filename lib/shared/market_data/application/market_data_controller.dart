@@ -50,6 +50,7 @@ class MarketDataController extends _$MarketDataController {
       symbols: symbols,
       snapshots: const {},
       latestTicks: const {},
+      priceSeries: const {},
       isLoadingSnapshots: true,
       clearFailure: true,
     );
@@ -69,6 +70,10 @@ class MarketDataController extends _$MarketDataController {
         onSuccess: (quote) {
           state = state.copyWith(
             snapshots: {...state.snapshots, symbol: quote},
+            priceSeries: {
+              ...state.priceSeries,
+              symbol: [quote.previousClose, quote.price],
+            },
             clearFailure: true,
           );
           AppLogger.info(
@@ -117,8 +122,15 @@ class MarketDataController extends _$MarketDataController {
   }
 
   void _onTick(PriceTick tick) {
+    final existing = state.priceSeries[tick.symbol] ?? const [];
+    final updatedSeries = [...existing, tick.price];
+    if (updatedSeries.length > 24) {
+      updatedSeries.removeRange(0, updatedSeries.length - 24);
+    }
+
     state = state.copyWith(
       latestTicks: {...state.latestTicks, tick.symbol: tick},
+      priceSeries: {...state.priceSeries, tick.symbol: updatedSeries},
     );
     AppLogger.info('LIVE price tick', scope: _scope, data: tick.toLogData());
   }
