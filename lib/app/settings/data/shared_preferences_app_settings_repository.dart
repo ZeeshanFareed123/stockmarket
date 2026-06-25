@@ -32,7 +32,7 @@ final class SharedPreferencesAppSettingsRepository
       fontFamily: _enumByName(
         AppFontFamily.values,
         _preferences.getString(_fontFamilyKey),
-        AppFontFamily.system,
+        AppFontFamily.sansSerif,
       ),
       textScaleFactor: _preferences.getDouble(_textScaleFactorKey) ?? 1,
     );

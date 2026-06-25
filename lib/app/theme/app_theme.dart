@@ -35,21 +35,15 @@ abstract final class AppTheme {
     required AppFontFamily fontFamily,
   }) {
     final isLight = brightness == Brightness.light;
-    final seed = AppColors.seed(palette);
-    final surface = isLight
-        ? AppColors.lightSurface(palette)
-        : AppColors.darkSurface(palette);
-    final scheme = ColorScheme.fromSeed(
-      seedColor: seed,
-      brightness: brightness,
-    ).copyWith(surface: surface);
-    final outline = scheme.outlineVariant.withValues(alpha: 0.65);
+    final scheme = isLight
+        ? AppColors.lightScheme(palette)
+        : AppColors.darkScheme(palette);
 
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
-      scaffoldBackgroundColor: surface,
+      scaffoldBackgroundColor: scheme.surface,
       splashFactory: InkRipple.splashFactory,
       textTheme: AppTypography.textTheme(
         brightness: brightness,
@@ -61,7 +55,40 @@ abstract final class AppTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.large),
-          side: BorderSide(color: outline),
+          side: BorderSide(color: scheme.outline),
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        height: 76,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        indicatorColor: scheme.primaryContainer,
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.medium),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            color: selected ? scheme.primary : scheme.onSurfaceVariant,
+            size: 27,
+          );
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            color: selected ? scheme.primary : scheme.onSurfaceVariant,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            fontSize: 12,
+          );
+        }),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: scheme.onSurface,
+          backgroundColor: scheme.surfaceContainerLowest,
+          side: BorderSide(color: scheme.outline),
+          minimumSize: const Size.square(48),
+          shape: const CircleBorder(),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -73,11 +100,11 @@ abstract final class AppTheme {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.medium),
-          borderSide: BorderSide(color: outline),
+          borderSide: BorderSide(color: scheme.outline),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.medium),
-          borderSide: BorderSide(color: outline),
+          borderSide: BorderSide(color: scheme.outline),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.medium),
@@ -95,6 +122,30 @@ abstract final class AppTheme {
             borderRadius: BorderRadius.circular(AppRadius.medium),
           ),
         ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size.fromHeight(52),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          side: BorderSide(color: scheme.outline),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.medium),
+          ),
+        ),
+      ),
+      dividerTheme: DividerThemeData(
+        color: scheme.outlineVariant,
+        space: 1,
+        thickness: 1,
+      ),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: scheme.primary,
+        inactiveTrackColor: scheme.primaryContainer,
+        thumbColor: scheme.primary,
+        overlayColor: scheme.primary.withValues(alpha: 0.1),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,

@@ -7,7 +7,7 @@ final class AppSettings {
   const AppSettings({
     this.themeMode = ThemeMode.system,
     this.colorPalette = AppColorPalette.indigo,
-    this.fontFamily = AppFontFamily.system,
+    this.fontFamily = AppFontFamily.sansSerif,
     this.textScaleFactor = 1,
   });
 

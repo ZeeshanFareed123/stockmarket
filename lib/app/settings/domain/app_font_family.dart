@@ -5,16 +5,16 @@ enum AppFontFamily {
   monospace;
 
   String get label => switch (this) {
-    AppFontFamily.system => 'System',
-    AppFontFamily.sansSerif => 'Sans Serif',
-    AppFontFamily.serif => 'Serif',
-    AppFontFamily.monospace => 'Monospace',
+    AppFontFamily.system => 'Device',
+    AppFontFamily.sansSerif => 'Modern',
+    AppFontFamily.serif => 'Editorial',
+    AppFontFamily.monospace => 'Mono',
   };
 
   String? get familyName => switch (this) {
     AppFontFamily.system => null,
-    AppFontFamily.sansSerif => 'sans-serif',
-    AppFontFamily.serif => 'serif',
-    AppFontFamily.monospace => 'monospace',
+    AppFontFamily.sansSerif => 'Inter',
+    AppFontFamily.serif => 'Lora',
+    AppFontFamily.monospace => 'JetBrainsMono',
   };
 }

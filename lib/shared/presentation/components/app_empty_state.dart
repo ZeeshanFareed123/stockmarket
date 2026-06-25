@@ -20,8 +20,15 @@ class AppEmptyState extends StatelessWidget {
     final colors = theme.colorScheme;
 
     return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 360),
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(maxWidth: 440),
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(AppRadius.large),
+          border: Border.all(color: colors.outline),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -7,6 +7,7 @@ class AppTabPage extends StatelessWidget {
     required this.subtitle,
     required this.child,
     this.actions = const [],
+    this.showStatusIndicator = false,
     super.key,
   });
 
@@ -14,6 +15,7 @@ class AppTabPage extends StatelessWidget {
   final String subtitle;
   final List<Widget> actions;
   final Widget child;
+  final bool showStatusIndicator;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,7 @@ class AppTabPage extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
-          AppSpacing.md,
+          AppSpacing.lg,
           AppSpacing.lg,
           AppSpacing.lg,
         ),
@@ -39,12 +41,29 @@ class AppTabPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(title, style: theme.textTheme.headlineMedium),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        subtitle,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Row(
+                        children: [
+                          if (showStatusIndicator) ...[
+                            Container(
+                              width: 9,
+                              height: 9,
+                              decoration: BoxDecoration(
+                                color: colors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                          ],
+                          Flexible(
+                            child: Text(
+                              subtitle,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

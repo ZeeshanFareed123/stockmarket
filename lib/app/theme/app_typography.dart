@@ -9,23 +9,26 @@ abstract final class AppTypography {
     final base = brightness == Brightness.light
         ? Typography.material2021().black
         : Typography.material2021().white;
+    final themed = base.apply(fontFamily: fontFamily.familyName);
 
-    return base
-        .apply(fontFamily: fontFamily.familyName)
-        .copyWith(
-          headlineLarge: base.headlineLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.8,
-          ),
-          headlineMedium: base.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.5,
-          ),
-          titleLarge: base.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-          titleMedium: base.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-          bodyLarge: base.bodyLarge?.copyWith(height: 1.45),
-          bodyMedium: base.bodyMedium?.copyWith(height: 1.45),
-          labelLarge: base.labelLarge?.copyWith(fontWeight: FontWeight.w700),
-        );
+    return themed.copyWith(
+      headlineLarge: themed.headlineLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+        letterSpacing: -1,
+      ),
+      headlineMedium: themed.headlineMedium?.copyWith(
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.7,
+      ),
+      headlineSmall: themed.headlineSmall?.copyWith(
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.5,
+      ),
+      titleLarge: themed.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      titleMedium: themed.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+      bodyLarge: themed.bodyLarge?.copyWith(height: 1.4),
+      bodyMedium: themed.bodyMedium?.copyWith(height: 1.4),
+      labelLarge: themed.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+    );
   }
 }

@@ -9,9 +9,15 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppTabPage(
-      title: 'Good morning',
-      subtitle: 'Your market overview',
+      title: 'Good morning, Alex',
+      subtitle: 'Markets are open',
+      showStatusIndicator: true,
       actions: [
+        AppHeaderAction(
+          icon: Icons.person_outline_rounded,
+          tooltip: 'Profile',
+          onPressed: () {},
+        ),
         AppHeaderAction(
           icon: Icons.search_rounded,
           tooltip: 'Search',

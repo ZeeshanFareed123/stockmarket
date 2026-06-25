@@ -22,7 +22,8 @@ class AppHeaderAction extends StatelessWidget {
       isLabelVisible: showIndicator,
       smallSize: 8,
       backgroundColor: colors.primary,
-      child: IconButton.outlined(
+      offset: const Offset(-3, 3),
+      child: IconButton(
         tooltip: tooltip,
         onPressed: onPressed,
         icon: Icon(icon),
