@@ -5,6 +5,7 @@ import 'package:stockubl/app/router/app_router.dart';
 import 'package:stockubl/app/settings/application/app_settings_controller.dart';
 import 'package:stockubl/app/theme/app_scroll_behavior.dart';
 import 'package:stockubl/app/theme/app_theme.dart';
+import 'package:stockubl/shared/market_data/presentation/market_data_lifecycle_host.dart';
 
 class StockUblApp extends ConsumerWidget {
   const StockUblApp({super.key});
@@ -37,11 +38,13 @@ class StockUblApp extends ConsumerWidget {
           2.0,
         );
 
-        return MediaQuery(
-          data: mediaQuery.copyWith(
-            textScaler: TextScaler.linear(effectiveScale),
+        return MarketDataLifecycleHost(
+          child: MediaQuery(
+            data: mediaQuery.copyWith(
+              textScaler: TextScaler.linear(effectiveScale),
+            ),
+            child: child ?? const SizedBox.shrink(),
           ),
-          child: child ?? const SizedBox.shrink(),
         );
       },
     );

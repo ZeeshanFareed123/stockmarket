@@ -53,13 +53,13 @@ not be embedded in production builds.
 REST returns `Result<T>` through repositories. Streaming exposes connection
 state separately and does not wrap every tick in `Result`.
 
-## Live prices (future Markets tracer bullet)
+## Live prices
 
 ```text
-REST snapshot
-  -> MarketDataCoordinator
-  -> QuoteStore <- WebSocket ticks
-  -> per-symbol Riverpod provider
+REST `/quote` snapshot
+  -> MarketDataController
+  -> MarketDataState <- WebSocket price ticks
+  -> per-symbol Riverpod selectors (next UI phase)
   -> affected row only
 ```
 
@@ -67,6 +67,21 @@ The live-price engine belongs under `shared/market_data`, not the Markets
 feature, because Home, Markets and Portfolio all consume quotes. Riverpod owns
 consumer lifecycle; the subscription registry only batches and reference-counts
 transport subscriptions.
+
+The current Twelve Data tracer bullet:
+
+- loads an initial quote through REST;
+- opens the official price WebSocket;
+- sends subscribe/unsubscribe commands for the desired symbol set;
+- sends a heartbeat every ten seconds;
+- reconnects with capped exponential backoff;
+- disconnects while the mobile app is backgrounded and resumes in foreground;
+- redacts the API key from logs;
+- defaults to one AAPL symbol so the public demo path can be verified.
+
+`TWELVE_DATA_API_KEY` is accepted through `--dart-define` for development only.
+Production mobile binaries must receive market data from the StockUBL backend
+gateway so provider credentials are never shipped to customers.
 
 Production fallback is:
 
@@ -95,7 +110,7 @@ views can be added later without rewriting business logic.
 3. Home and Portfolio
 4. Authentication and guarded navigation
 5. Instrument details and Buy/Sell
-6. Twelve Data integration
+6. Twelve Data integration (REST/WebSocket foundation complete)
 7. Backend gateway, Firebase and production security
 8. Local database/offline support
 9. Responsive web views
