@@ -19,7 +19,7 @@ class MarketCategorySelector extends StatelessWidget {
     final colors = theme.colorScheme;
 
     return SizedBox(
-      height: 48,
+      height: 44,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: MarketCategory.values.length,
@@ -35,7 +35,7 @@ class MarketCategorySelector extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
+                vertical: AppSpacing.xs,
               ),
               decoration: BoxDecoration(
                 color: isSelected

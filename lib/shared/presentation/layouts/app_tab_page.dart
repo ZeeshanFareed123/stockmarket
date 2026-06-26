@@ -41,30 +41,33 @@ class AppTabPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(title, style: theme.textTheme.headlineMedium),
-                      const SizedBox(height: AppSpacing.xs),
-                      Row(
-                        children: [
-                          if (showStatusIndicator) ...[
-                            Container(
-                              width: 9,
-                              height: 9,
-                              decoration: BoxDecoration(
-                                color: colors.primary,
-                                shape: BoxShape.circle,
+                      if (subtitle.trim().isNotEmpty ||
+                          showStatusIndicator) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Row(
+                          children: [
+                            if (showStatusIndicator) ...[
+                              Container(
+                                width: 9,
+                                height: 9,
+                                decoration: BoxDecoration(
+                                  color: colors.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.xs),
+                            ],
+                            Flexible(
+                              child: Text(
+                                subtitle,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: colors.onSurfaceVariant,
+                                ),
                               ),
                             ),
-                            const SizedBox(width: AppSpacing.xs),
                           ],
-                          Flexible(
-                            child: Text(
-                              subtitle,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: colors.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -74,7 +77,7 @@ class AppTabPage extends StatelessWidget {
                 ],
               ],
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
             Expanded(child: child),
           ],
         ),

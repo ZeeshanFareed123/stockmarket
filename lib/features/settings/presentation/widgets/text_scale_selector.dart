@@ -23,10 +23,10 @@ class TextScaleSelector extends StatelessWidget {
             Text('A', style: theme.textTheme.bodySmall),
             Expanded(
               child: Slider(
-                value: value,
+                value: value.clamp(0.8, 1.2),
                 min: 0.8,
-                max: 1.4,
-                divisions: 6,
+                max: 1.2,
+                divisions: 4,
                 label: '${(value * 100).round()}%',
                 onChanged: onChanged,
               ),

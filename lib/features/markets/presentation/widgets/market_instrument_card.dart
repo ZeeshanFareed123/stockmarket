@@ -7,16 +7,9 @@ import 'package:stockubl/features/markets/presentation/models/market_instrument_
 import 'package:stockubl/features/markets/presentation/widgets/market_sparkline.dart';
 
 class MarketInstrumentCard extends StatelessWidget {
-  const MarketInstrumentCard({
-    required this.instruments,
-    required this.watchlist,
-    required this.onWatchlistChanged,
-    super.key,
-  });
+  const MarketInstrumentCard({required this.instruments, super.key});
 
   final List<MarketInstrumentViewData> instruments;
-  final Set<String> watchlist;
-  final ValueChanged<String> onWatchlistChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -31,12 +24,7 @@ class MarketInstrumentCard extends StatelessWidget {
       child: Column(
         children: [
           for (var index = 0; index < instruments.length; index++) ...[
-            MarketInstrumentRow(
-              instrument: instruments[index],
-              isSaved: watchlist.contains(instruments[index].definition.symbol),
-              onSavePressed: () =>
-                  onWatchlistChanged(instruments[index].definition.symbol),
-            ),
+            MarketInstrumentRow(instrument: instruments[index]),
             if (index != instruments.length - 1)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -50,16 +38,9 @@ class MarketInstrumentCard extends StatelessWidget {
 }
 
 class MarketInstrumentRow extends StatelessWidget {
-  const MarketInstrumentRow({
-    required this.instrument,
-    required this.isSaved,
-    required this.onSavePressed,
-    super.key,
-  });
+  const MarketInstrumentRow({required this.instrument, super.key});
 
   final MarketInstrumentViewData instrument;
-  final bool isSaved;
-  final VoidCallback onSavePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -74,17 +55,12 @@ class MarketInstrumentRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
       child: Row(
         children: [
-          _InstrumentBadge(
-            label: instrument.definition.badge,
-            isLive: instrument.isLive,
-          ),
-          const SizedBox(width: AppSpacing.md),
           Expanded(
-            flex: 5,
+            flex: 6,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -97,8 +73,11 @@ class MarketInstrumentRow extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
                   instrument.definition.symbol,
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
                     color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
@@ -119,7 +98,7 @@ class MarketInstrumentRow extends StatelessWidget {
           Expanded(
             flex: 4,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
               child: MarketSparkline(
                 values: instrument.priceSeries,
                 color: movementColor,
@@ -127,7 +106,7 @@ class MarketInstrumentRow extends StatelessWidget {
             ),
           ),
           SizedBox(
-            width: 92,
+            width: 104,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -138,14 +117,11 @@ class MarketInstrumentRow extends StatelessWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 else
-                  Text(
-                    _formatPrice(instrument),
-                    maxLines: 1,
-                    overflow: TextOverflow.fade,
-                    softWrap: false,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
+                  _PriceHighlight(
+                    price: _formatPrice(instrument),
+                    color: movementColor,
+                    isHighlighted:
+                        instrument.isPositive || instrument.isNegative,
                   ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
@@ -157,15 +133,6 @@ class MarketInstrumentRow extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          IconButton(
-            tooltip: isSaved ? 'Remove from watchlist' : 'Add to watchlist',
-            onPressed: onSavePressed,
-            icon: Icon(
-              isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-              color: isSaved ? colors.primary : colors.onSurfaceVariant,
             ),
           ),
         ],
@@ -219,34 +186,41 @@ class MarketInstrumentRow extends StatelessWidget {
   }
 }
 
-class _InstrumentBadge extends StatelessWidget {
-  const _InstrumentBadge({required this.label, required this.isLive});
+class _PriceHighlight extends StatelessWidget {
+  const _PriceHighlight({
+    required this.price,
+    required this.color,
+    required this.isHighlighted,
+  });
 
-  final String label;
-  final bool isLive;
+  final String price;
+  final Color color;
+  final bool isHighlighted;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
 
-    return Badge(
-      isLabelVisible: isLive,
-      backgroundColor: AppColors.gain,
-      smallSize: 8,
-      child: Container(
-        width: 54,
-        height: 54,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: colors.primaryContainer,
-          shape: BoxShape.circle,
-        ),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: colors.primary,
-            fontWeight: FontWeight.w700,
-          ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOut,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: AppSpacing.xxs,
+      ),
+      decoration: BoxDecoration(
+        color: isHighlighted ? color.withValues(alpha: 0.18) : null,
+        borderRadius: BorderRadius.circular(AppRadius.small),
+      ),
+      child: Text(
+        price,
+        maxLines: 1,
+        overflow: TextOverflow.fade,
+        softWrap: false,
+        textAlign: TextAlign.end,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w800,
+          fontFeatures: const [FontFeature.tabularFigures()],
         ),
       ),
     );

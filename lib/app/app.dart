@@ -35,7 +35,7 @@ class StockUblApp extends ConsumerWidget {
         final systemScale = mediaQuery.textScaler.scale(16) / 16;
         final effectiveScale = (systemScale * settings.textScaleFactor).clamp(
           0.8,
-          2.0,
+          1.2,
         );
 
         return MarketDataLifecycleHost(

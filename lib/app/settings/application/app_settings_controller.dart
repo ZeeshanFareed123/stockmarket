@@ -11,7 +11,10 @@ part 'app_settings_controller.g.dart';
 class AppSettingsController extends _$AppSettingsController {
   @override
   AppSettings build() {
-    return ref.read(appSettingsRepositoryProvider).load();
+    final settings = ref.read(appSettingsRepositoryProvider).load();
+    return settings.copyWith(
+      textScaleFactor: settings.textScaleFactor.clamp(0.8, 1.2),
+    );
   }
 
   Future<void> setThemeMode(ThemeMode value) {
@@ -27,7 +30,7 @@ class AppSettingsController extends _$AppSettingsController {
   }
 
   Future<void> setTextScaleFactor(double value) {
-    return _update(state.copyWith(textScaleFactor: value.clamp(0.8, 1.4)));
+    return _update(state.copyWith(textScaleFactor: value.clamp(0.8, 1.2)));
   }
 
   Future<void> reset() {
