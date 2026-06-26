@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:stockubl/app/theme/app_colors.dart';
@@ -118,10 +121,9 @@ class MarketInstrumentRow extends StatelessWidget {
                   )
                 else
                   _PriceHighlight(
+                    key: ValueKey(instrument.definition.symbol),
                     price: _formatPrice(instrument),
-                    color: movementColor,
-                    isHighlighted:
-                        instrument.isPositive || instrument.isNegative,
+                    priceValue: instrument.price,
                   ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
@@ -186,34 +188,69 @@ class MarketInstrumentRow extends StatelessWidget {
   }
 }
 
-class _PriceHighlight extends StatelessWidget {
+class _PriceHighlight extends StatefulWidget {
   const _PriceHighlight({
+    super.key,
     required this.price,
-    required this.color,
-    required this.isHighlighted,
+    required this.priceValue,
   });
 
   final String price;
-  final Color color;
-  final bool isHighlighted;
+  final Decimal? priceValue;
+
+  @override
+  State<_PriceHighlight> createState() => _PriceHighlightState();
+}
+
+class _PriceHighlightState extends State<_PriceHighlight> {
+  Color? _flashColor;
+  Timer? _hideTimer;
+
+  @override
+  void didUpdateWidget(covariant _PriceHighlight oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final previous = oldWidget.priceValue;
+    final current = widget.priceValue;
+
+    if (previous == null || current == null || previous == current) {
+      return;
+    }
+
+    _hideTimer?.cancel();
+    setState(() {
+      _flashColor = current > previous ? AppColors.gain : AppColors.loss;
+    });
+    _hideTimer = Timer(const Duration(milliseconds: 950), () {
+      if (mounted) {
+        setState(() => _flashColor = null);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _hideTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final flashColor = _flashColor;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 240),
-      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOutCubic,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xs,
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: isHighlighted ? color.withValues(alpha: 0.18) : null,
+        color: flashColor?.withValues(alpha: 0.28),
         borderRadius: BorderRadius.circular(AppRadius.small),
       ),
       child: Text(
-        price,
+        widget.price,
         maxLines: 1,
         overflow: TextOverflow.fade,
         softWrap: false,

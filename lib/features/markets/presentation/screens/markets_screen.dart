@@ -5,7 +5,6 @@ import 'package:stockubl/features/markets/domain/market_instrument_catalog.dart'
 import 'package:stockubl/features/markets/presentation/models/market_instrument_view_data.dart';
 import 'package:stockubl/features/markets/presentation/widgets/market_category_selector.dart';
 import 'package:stockubl/features/markets/presentation/widgets/market_instrument_card.dart';
-import 'package:stockubl/features/markets/presentation/widgets/market_search_field.dart';
 import 'package:stockubl/shared/market_data/application/market_data_controller.dart';
 import 'package:stockubl/shared/presentation/components/app_header_action.dart';
 import 'package:stockubl/shared/presentation/layouts/app_tab_page.dart';
@@ -18,29 +17,15 @@ class MarketsScreen extends ConsumerStatefulWidget {
 }
 
 class _MarketsScreenState extends ConsumerState<MarketsScreen> {
-  final _searchController = TextEditingController();
   MarketCategory _selectedCategory = MarketCategory.popular;
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final marketState = ref.watch(marketDataControllerProvider);
-    final query = _searchController.text.trim().toLowerCase();
     final instruments = MarketInstrumentCatalog.popular
         .where((instrument) {
-          final matchesCategory =
-              _selectedCategory == MarketCategory.popular ||
+          return _selectedCategory == MarketCategory.popular ||
               instrument.category == _selectedCategory;
-          final matchesQuery =
-              query.isEmpty ||
-              instrument.displayName.toLowerCase().contains(query) ||
-              instrument.symbol.toLowerCase().contains(query);
-          return matchesCategory && matchesQuery;
         })
         .map(
           (definition) => MarketInstrumentViewData.fromState(
@@ -61,8 +46,8 @@ class _MarketsScreenState extends ConsumerState<MarketsScreen> {
           onPressed: () {},
         ),
       ],
-      child: ListView(
-        padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           MarketCategorySelector(
             selected: _selectedCategory,
@@ -72,11 +57,6 @@ class _MarketsScreenState extends ConsumerState<MarketsScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
           const _TradeActionRow(),
-          const SizedBox(height: AppSpacing.md),
-          MarketSearchField(
-            controller: _searchController,
-            onChanged: (_) => setState(() {}),
-          ),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
@@ -97,10 +77,14 @@ class _MarketsScreenState extends ConsumerState<MarketsScreen> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          if (instruments.isEmpty)
-            const _NoMarketResults()
-          else
-            MarketInstrumentCard(instruments: instruments),
+          Expanded(
+            child: instruments.isEmpty
+                ? const _NoMarketResults()
+                : ListView(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    children: [MarketInstrumentCard(instruments: instruments)],
+                  ),
+          ),
           const SizedBox(height: AppSpacing.md),
           const _StartTradingButton(),
         ],
@@ -140,7 +124,7 @@ class _DisabledTradeButton extends StatelessWidget {
       enabled: false,
       label: '$label disabled',
       child: Container(
-        height: 58,
+        height: 48,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isPrimary ? colors.primary : colors.primaryContainer,
@@ -172,7 +156,7 @@ class _StartTradingButton extends StatelessWidget {
       enabled: false,
       label: 'Start Trading disabled',
       child: Container(
-        height: 56,
+        height: 48,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: colors.primary,

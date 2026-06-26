@@ -34,6 +34,10 @@ flutter:
     - family: Inter
       fonts:
         - asset: assets/fonts/inter/Inter-Variable.ttf
+    - family: PoppinsLight
+      fonts:
+        - asset: assets/fonts/poppins/Poppins-Light.ttf
+          weight: 300
     - family: Lora
       fonts:
         - asset: assets/fonts/lora/Lora-Variable.ttf
