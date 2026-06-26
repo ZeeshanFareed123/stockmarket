@@ -38,6 +38,7 @@ class _MarketsScreenState extends ConsumerState<MarketsScreen> {
     return AppTabPage(
       title: 'Markets',
       subtitle: '',
+      bottomPadding: 0,
       actions: [
         AppHeaderAction(
           icon: Icons.notifications_outlined,
@@ -81,11 +82,11 @@ class _MarketsScreenState extends ConsumerState<MarketsScreen> {
             child: instruments.isEmpty
                 ? const _NoMarketResults()
                 : ListView(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                     children: [MarketInstrumentCard(instruments: instruments)],
                   ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.xs),
           const _StartTradingButton(),
         ],
       ),

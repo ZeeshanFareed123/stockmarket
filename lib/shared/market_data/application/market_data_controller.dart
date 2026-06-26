@@ -14,9 +14,13 @@ part 'market_data_controller.g.dart';
 @Riverpod(keepAlive: true)
 class MarketDataController extends _$MarketDataController {
   static const _scope = 'market.engine';
+  static const _minimumTickDisplayInterval = Duration(seconds: 4);
 
   StreamSubscription<PriceTick>? _tickSubscription;
   StreamSubscription<MarketStreamStatus>? _statusSubscription;
+  final Map<String, DateTime> _lastAppliedTickAt = {};
+  final Map<String, PriceTick> _pendingTicks = {};
+  final Map<String, Timer> _pendingTickTimers = {};
   bool _started = false;
 
   @override
@@ -26,6 +30,9 @@ class MarketDataController extends _$MarketDataController {
     _statusSubscription = repository.streamStatuses.listen(_onStatus);
 
     ref.onDispose(() {
+      for (final timer in _pendingTickTimers.values) {
+        timer.cancel();
+      }
       unawaited(_tickSubscription?.cancel());
       unawaited(_statusSubscription?.cancel());
       unawaited(repository.dispose());
@@ -46,6 +53,7 @@ class MarketDataController extends _$MarketDataController {
     }
 
     _started = true;
+    _clearTickThrottle();
     state = state.copyWith(
       symbols: symbols,
       snapshots: const {},
@@ -122,6 +130,33 @@ class MarketDataController extends _$MarketDataController {
   }
 
   void _onTick(PriceTick tick) {
+    final now = DateTime.now();
+    final lastApplied = _lastAppliedTickAt[tick.symbol];
+
+    if (lastApplied == null ||
+        now.difference(lastApplied) >= _minimumTickDisplayInterval) {
+      _pendingTicks.remove(tick.symbol);
+      _pendingTickTimers.remove(tick.symbol)?.cancel();
+      _applyTick(tick, now);
+      return;
+    }
+
+    _pendingTicks[tick.symbol] = tick;
+    if (_pendingTickTimers.containsKey(tick.symbol)) {
+      return;
+    }
+
+    final delay = _minimumTickDisplayInterval - now.difference(lastApplied);
+    _pendingTickTimers[tick.symbol] = Timer(delay, () {
+      _pendingTickTimers.remove(tick.symbol);
+      final pendingTick = _pendingTicks.remove(tick.symbol);
+      if (pendingTick != null) {
+        _applyTick(pendingTick, DateTime.now());
+      }
+    });
+  }
+
+  void _applyTick(PriceTick tick, DateTime appliedAt) {
     final existing = state.priceSeries[tick.symbol] ?? const [];
     final updatedSeries = [...existing, tick.price];
     if (updatedSeries.length > 24) {
@@ -132,7 +167,17 @@ class MarketDataController extends _$MarketDataController {
       latestTicks: {...state.latestTicks, tick.symbol: tick},
       priceSeries: {...state.priceSeries, tick.symbol: updatedSeries},
     );
+    _lastAppliedTickAt[tick.symbol] = appliedAt;
     AppLogger.info('LIVE price tick', scope: _scope, data: tick.toLogData());
+  }
+
+  void _clearTickThrottle() {
+    for (final timer in _pendingTickTimers.values) {
+      timer.cancel();
+    }
+    _lastAppliedTickAt.clear();
+    _pendingTicks.clear();
+    _pendingTickTimers.clear();
   }
 
   void _onStatus(MarketStreamStatus status) {

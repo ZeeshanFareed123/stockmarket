@@ -86,7 +86,7 @@ final class MockMarketDataRepository implements MarketDataRepository {
       return;
     }
 
-    _timer = Timer.periodic(const Duration(seconds: 2), (_) {
+    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
       _tick++;
       final price = Decimal.parse(
         (275 + ((_tick % 10) * 0.07)).toStringAsFixed(2),

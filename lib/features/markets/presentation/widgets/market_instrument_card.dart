@@ -220,7 +220,7 @@ class _PriceHighlightState extends State<_PriceHighlight> {
     setState(() {
       _flashColor = current > previous ? AppColors.gain : AppColors.loss;
     });
-    _hideTimer = Timer(const Duration(milliseconds: 950), () {
+    _hideTimer = Timer(const Duration(milliseconds: 1500), () {
       if (mounted) {
         setState(() => _flashColor = null);
       }
@@ -239,14 +239,14 @@ class _PriceHighlightState extends State<_PriceHighlight> {
     final flashColor = _flashColor;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
+      duration: const Duration(milliseconds: 320),
       curve: Curves.easeOutCubic,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xs,
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: flashColor?.withValues(alpha: 0.28),
+        color: flashColor?.withValues(alpha: 0.24),
         borderRadius: BorderRadius.circular(AppRadius.small),
       ),
       child: Text(

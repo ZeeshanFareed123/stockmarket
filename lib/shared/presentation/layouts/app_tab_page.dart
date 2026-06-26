@@ -8,6 +8,7 @@ class AppTabPage extends StatelessWidget {
     required this.child,
     this.actions = const [],
     this.showStatusIndicator = false,
+    this.bottomPadding = AppSpacing.lg,
     super.key,
   });
 
@@ -16,6 +17,7 @@ class AppTabPage extends StatelessWidget {
   final List<Widget> actions;
   final Widget child;
   final bool showStatusIndicator;
+  final double bottomPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -24,11 +26,11 @@ class AppTabPage extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           AppSpacing.lg,
           AppSpacing.lg,
           AppSpacing.lg,
-          AppSpacing.lg,
+          bottomPadding,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

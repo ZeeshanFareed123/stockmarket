@@ -18,12 +18,18 @@ class MarketCategorySelector extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return SizedBox(
-      height: 44,
+    return Container(
+      height: 58,
+      padding: const EdgeInsets.all(AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(AppRadius.large),
+        border: Border.all(color: colors.outline),
+      ),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: MarketCategory.values.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
         itemBuilder: (context, index) {
           final category = MarketCategory.values[index];
           final isSelected = category == selected;
@@ -35,7 +41,7 @@ class MarketCategorySelector extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
+                vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
                 color: isSelected
