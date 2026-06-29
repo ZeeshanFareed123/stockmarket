@@ -17,7 +17,7 @@ class ColorPaletteSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const spacing = AppSpacing.sm;
-    const columns = 3;
+    const columns = 5;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -58,8 +58,7 @@ class _PaletteOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+    final colors = Theme.of(context).colorScheme;
     final color = AppColors.seed(palette);
 
     return Semantics(
@@ -72,6 +71,8 @@ class _PaletteOption extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           width: width,
+          height: 52,
+          alignment: Alignment.center,
           padding: const EdgeInsets.all(AppSpacing.xs),
           decoration: BoxDecoration(
             color: isSelected
@@ -83,42 +84,19 @@ class _PaletteOption extends StatelessWidget {
               width: isSelected ? 1.5 : 1,
             ),
           ),
-          child: Column(
-            children: [
-              Container(
-                width: 26,
-                height: 26,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.22),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: isSelected
-                    ? const Icon(
-                        Icons.check_rounded,
-                        color: Colors.white,
-                        size: 16,
-                      )
-                    : null,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                palette.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: isSelected
-                      ? colors.onPrimaryContainer
-                      : colors.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          child: Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(color: color.withValues(alpha: 0.22), blurRadius: 10),
+              ],
+            ),
+            child: isSelected
+                ? const Icon(Icons.check_rounded, color: Colors.white, size: 17)
+                : null,
           ),
         ),
       ),

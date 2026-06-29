@@ -33,9 +33,6 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           SettingsSection(
             title: 'Appearance',
-            description:
-                'Follow your device theme or choose a fixed light or dark '
-                'experience.',
             child: ThemeModeSelector(
               value: settings.themeMode,
               onChanged: controller.setThemeMode,
@@ -44,9 +41,6 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           SettingsSection(
             title: 'Color theme',
-            description:
-                'The accent updates buttons, selected tabs, highlights, and '
-                'interactive controls across the app.',
             child: ColorPaletteSelector(
               value: settings.colorPalette,
               onChanged: controller.setColorPalette,
@@ -55,8 +49,6 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           SettingsSection(
             title: 'Typography',
-            description:
-                'Choose an app-wide font style and adjust readability.',
             child: Column(
               children: [
                 FontFamilySelector(

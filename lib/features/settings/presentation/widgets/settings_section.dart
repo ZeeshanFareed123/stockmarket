@@ -4,8 +4,8 @@ import 'package:stockubl/app/theme/app_spacing.dart';
 class SettingsSection extends StatelessWidget {
   const SettingsSection({
     required this.title,
-    required this.description,
     required this.child,
+    this.description = '',
     super.key,
   });
 
@@ -25,13 +25,15 @@ class SettingsSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(title, style: theme.textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              description,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.onSurfaceVariant,
+            if (description.trim().isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                description,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
               ),
-            ),
+            ],
             const SizedBox(height: AppSpacing.lg),
             child,
           ],

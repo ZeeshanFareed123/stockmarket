@@ -46,6 +46,24 @@ final class MarketInstrumentViewData {
     );
   }
 
+  /// Maps a set of catalog [definitions] against the live market [state].
+  ///
+  /// Shared by Home (watchlist) and Markets (category list) so the
+  /// definition → view-data pipeline lives in one place.
+  static List<MarketInstrumentViewData> fromDefinitions({
+    required Iterable<MarketInstrumentDefinition> definitions,
+    required MarketDataState state,
+  }) {
+    return definitions
+        .map(
+          (definition) => MarketInstrumentViewData.fromState(
+            definition: definition,
+            state: state,
+          ),
+        )
+        .toList(growable: false);
+  }
+
   final MarketInstrumentDefinition definition;
   final Decimal? price;
   final Decimal? percentChange;

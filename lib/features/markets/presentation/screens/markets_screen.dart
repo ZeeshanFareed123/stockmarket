@@ -4,7 +4,9 @@ import 'package:stockubl/app/theme/app_spacing.dart';
 import 'package:stockubl/features/markets/domain/market_instrument_catalog.dart';
 import 'package:stockubl/features/markets/presentation/models/market_instrument_view_data.dart';
 import 'package:stockubl/features/markets/presentation/widgets/market_category_selector.dart';
+import 'package:stockubl/features/markets/presentation/widgets/market_data_status.dart';
 import 'package:stockubl/features/markets/presentation/widgets/market_instrument_card.dart';
+import 'package:stockubl/features/markets/presentation/widgets/market_search_field.dart';
 import 'package:stockubl/shared/market_data/application/market_data_controller.dart';
 import 'package:stockubl/shared/presentation/components/app_header_action.dart';
 import 'package:stockubl/shared/presentation/layouts/app_tab_page.dart';
@@ -17,23 +19,33 @@ class MarketsScreen extends ConsumerStatefulWidget {
 }
 
 class _MarketsScreenState extends ConsumerState<MarketsScreen> {
+  final _searchController = TextEditingController();
   MarketCategory _selectedCategory = MarketCategory.popular;
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final marketState = ref.watch(marketDataControllerProvider);
-    final instruments = MarketInstrumentCatalog.popular
-        .where((instrument) {
-          return _selectedCategory == MarketCategory.popular ||
-              instrument.category == _selectedCategory;
-        })
-        .map(
-          (definition) => MarketInstrumentViewData.fromState(
-            definition: definition,
-            state: marketState,
-          ),
-        )
-        .toList(growable: false);
+    final query = _query.trim().toLowerCase();
+    final instruments = MarketInstrumentViewData.fromDefinitions(
+      definitions: MarketInstrumentCatalog.popular.where((instrument) {
+        final matchesCategory =
+            _selectedCategory == MarketCategory.popular ||
+            instrument.category == _selectedCategory;
+        final matchesQuery =
+            query.isEmpty ||
+            instrument.symbol.toLowerCase().contains(query) ||
+            instrument.displayName.toLowerCase().contains(query);
+        return matchesCategory && matchesQuery;
+      }),
+      state: marketState,
+    );
 
     return AppTabPage(
       title: 'Markets',
@@ -56,8 +68,15 @@ class _MarketsScreenState extends ConsumerState<MarketsScreen> {
               setState(() => _selectedCategory = category);
             },
           ),
+          const SizedBox(height: AppSpacing.sm),
+          MarketSearchField(
+            controller: _searchController,
+            onChanged: (value) => setState(() => _query = value),
+          ),
           const SizedBox(height: AppSpacing.md),
           const _TradeActionRow(),
+          const SizedBox(height: AppSpacing.sm),
+          MarketDataStatus(status: marketState.streamStatus),
           if (marketState.lastFailure != null) ...[
             const SizedBox(height: AppSpacing.sm),
             _MarketFailureBanner(message: marketState.lastFailure!.message),
