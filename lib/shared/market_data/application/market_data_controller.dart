@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:stockubl/app/config/app_config_provider.dart';
 import 'package:stockubl/core/logging/app_logger.dart';
 import 'package:stockubl/shared/market_data/application/market_data_state.dart';
 import 'package:stockubl/shared/market_data/data/market_data_repository_provider.dart';
+import 'package:stockubl/shared/market_data/domain/entities/market_quote.dart';
 import 'package:stockubl/shared/market_data/domain/entities/market_stream_status.dart';
 import 'package:stockubl/shared/market_data/domain/entities/price_tick.dart';
 
@@ -80,7 +82,7 @@ class MarketDataController extends _$MarketDataController {
             snapshots: {...state.snapshots, symbol: quote},
             priceSeries: {
               ...state.priceSeries,
-              symbol: [quote.previousClose, quote.price],
+              symbol: _seedSparklineSeries(quote),
             },
             clearFailure: true,
           );
@@ -200,5 +202,31 @@ class MarketDataController extends _$MarketDataController {
         .where((symbol) => symbol.isNotEmpty)
         .take(limit)
         .toSet();
+  }
+
+  List<Decimal> _seedSparklineSeries(MarketQuote quote) {
+    final start = double.tryParse(quote.previousClose.toString()) ?? 0;
+    final end = double.tryParse(quote.price.toString()) ?? start;
+    if (start == 0 && end == 0) {
+      return [quote.price];
+    }
+
+    final symbolBias = quote.symbol.codeUnits.fold<int>(
+      0,
+      (previous, codeUnit) => previous + codeUnit,
+    );
+    final direction = end >= start ? 1.0 : -1.0;
+    final volatility = ((end - start).abs() * 0.18).clamp(0.05, 2.4);
+    const pointsCount = 22;
+
+    return List<Decimal>.generate(pointsCount, (index) {
+      final progress = index / (pointsCount - 1);
+      final trend = start + ((end - start) * progress);
+      final wave =
+          ((index % 5) - 2) * volatility * 0.38 +
+          (((index + symbolBias) % 3) - 1) * volatility * 0.2;
+      final value = index == pointsCount - 1 ? end : trend + (wave * direction);
+      return Decimal.parse(value.toStringAsFixed(4));
+    });
   }
 }

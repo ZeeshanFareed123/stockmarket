@@ -58,30 +58,6 @@ abstract final class AppTheme {
           side: BorderSide(color: scheme.outline),
         ),
       ),
-      navigationBarTheme: NavigationBarThemeData(
-        height: 76,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        indicatorColor: scheme.primaryContainer,
-        indicatorShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.medium),
-        ),
-        iconTheme: WidgetStateProperty.resolveWith((states) {
-          final selected = states.contains(WidgetState.selected);
-          return IconThemeData(
-            color: selected ? scheme.primary : scheme.onSurfaceVariant,
-            size: 27,
-          );
-        }),
-        labelTextStyle: WidgetStateProperty.resolveWith((states) {
-          final selected = states.contains(WidgetState.selected);
-          return TextStyle(
-            color: selected ? scheme.primary : scheme.onSurfaceVariant,
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            fontSize: 12,
-          );
-        }),
-      ),
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
           foregroundColor: scheme.onSurface,

@@ -16,6 +16,7 @@ final class MockMarketDataRepository implements MarketDataRepository {
   Timer? _timer;
   Set<String> _symbols = {};
   int _tick = 0;
+  final Map<String, Decimal> _lastPrices = {};
 
   @override
   Stream<PriceTick> get priceTicks => _tickController.stream;
@@ -88,10 +89,16 @@ final class MockMarketDataRepository implements MarketDataRepository {
 
     _timer = Timer.periodic(const Duration(seconds: 4), (_) {
       _tick++;
-      final price = Decimal.parse(
-        (275 + ((_tick % 10) * 0.07)).toStringAsFixed(2),
-      );
       for (final symbol in _symbols) {
+        final base = _lastPrices[symbol] ?? Decimal.parse('275.05');
+        final direction = ((_tick + symbol.length) % 6) < 4 ? 1 : -1;
+        final step = 0.03 + (((_tick + symbol.codeUnitAt(0)) % 4) * 0.02);
+        final price = Decimal.parse(
+          (double.parse(base.toString()) + (direction * step)).toStringAsFixed(
+            2,
+          ),
+        );
+        _lastPrices[symbol] = price;
         _tickController.add(
           PriceTick(
             symbol: symbol,

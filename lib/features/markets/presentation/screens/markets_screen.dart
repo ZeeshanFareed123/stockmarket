@@ -38,7 +38,7 @@ class _MarketsScreenState extends ConsumerState<MarketsScreen> {
     return AppTabPage(
       title: 'Markets',
       subtitle: '',
-      bottomPadding: 0,
+      bottomPadding: AppSpacing.sm,
       actions: [
         AppHeaderAction(
           icon: Icons.notifications_outlined,
@@ -58,6 +58,10 @@ class _MarketsScreenState extends ConsumerState<MarketsScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
           const _TradeActionRow(),
+          if (marketState.lastFailure != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _MarketFailureBanner(message: marketState.lastFailure!.message),
+          ],
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
@@ -66,7 +70,7 @@ class _MarketsScreenState extends ConsumerState<MarketsScreen> {
                   _selectedCategory == MarketCategory.popular
                       ? 'Popular instruments'
                       : _selectedCategory.label,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
               Text(
@@ -94,6 +98,51 @@ class _MarketsScreenState extends ConsumerState<MarketsScreen> {
   }
 }
 
+class _MarketFailureBanner extends StatelessWidget {
+  const _MarketFailureBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: colors.errorContainer.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.error.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline_rounded,
+            color: colors.onErrorContainer,
+            size: 20,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colors.onErrorContainer,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TradeActionRow extends StatelessWidget {
   const _TradeActionRow();
 
@@ -101,18 +150,35 @@ class _TradeActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        Expanded(child: _DisabledTradeButton(label: 'Buy', isPrimary: true)),
+        Expanded(
+          child: _DisabledTradeButton(
+            label: 'Buy',
+            icon: Icons.trending_up_rounded,
+            isPrimary: true,
+          ),
+        ),
         SizedBox(width: AppSpacing.md),
-        Expanded(child: _DisabledTradeButton(label: 'Sell', isPrimary: false)),
+        Expanded(
+          child: _DisabledTradeButton(
+            label: 'Sell',
+            icon: Icons.trending_down_rounded,
+            isPrimary: false,
+          ),
+        ),
       ],
     );
   }
 }
 
 class _DisabledTradeButton extends StatelessWidget {
-  const _DisabledTradeButton({required this.label, required this.isPrimary});
+  const _DisabledTradeButton({
+    required this.label,
+    required this.icon,
+    required this.isPrimary,
+  });
 
   final String label;
+  final IconData icon;
   final bool isPrimary;
 
   @override
@@ -132,12 +198,23 @@ class _DisabledTradeButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           border: isPrimary ? null : Border.all(color: colors.outlineVariant),
         ),
-        child: Text(
-          label,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: isPrimary ? colors.onPrimary : colors.primary,
-            fontWeight: FontWeight.w800,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isPrimary ? colors.onPrimary : colors.primary,
+              size: 22,
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              label,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: isPrimary ? colors.onPrimary : colors.primary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -157,18 +234,29 @@ class _StartTradingButton extends StatelessWidget {
       enabled: false,
       label: 'Start Trading disabled',
       child: Container(
-        height: 48,
+        height: 42,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: colors.primary,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Text(
-          'Start Trading',
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: colors.onPrimary,
-            fontWeight: FontWeight.w800,
-          ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Start Trading',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: colors.onPrimary,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Icon(
+              Icons.arrow_forward_rounded,
+              color: colors.onPrimary,
+              size: 22,
+            ),
+          ],
         ),
       ),
     );

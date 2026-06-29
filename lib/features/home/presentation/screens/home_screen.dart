@@ -9,7 +9,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppTabPage(
-      title: 'Good morning, Alex',
+      title: 'Hi, Zeeshan',
       subtitle: 'Markets are open',
       showStatusIndicator: true,
       actions: [

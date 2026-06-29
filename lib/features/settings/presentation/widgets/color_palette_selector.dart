@@ -16,18 +16,29 @@ class ColorPaletteSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: AppColorPalette.values
-          .map((palette) {
-            return _PaletteOption(
-              palette: palette,
-              isSelected: palette == value,
-              onTap: () => onChanged(palette),
-            );
-          })
-          .toList(growable: false),
+    const spacing = AppSpacing.sm;
+    const columns = 3;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final itemWidth =
+            (constraints.maxWidth - spacing * (columns - 1)) / columns;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: AppColorPalette.values
+              .map((palette) {
+                return _PaletteOption(
+                  palette: palette,
+                  isSelected: palette == value,
+                  width: itemWidth,
+                  onTap: () => onChanged(palette),
+                );
+              })
+              .toList(growable: false),
+        );
+      },
     );
   }
 }
@@ -36,11 +47,13 @@ class _PaletteOption extends StatelessWidget {
   const _PaletteOption({
     required this.palette,
     required this.isSelected,
+    required this.width,
     required this.onTap,
   });
 
   final AppColorPalette palette;
   final bool isSelected;
+  final double width;
   final VoidCallback onTap;
 
   @override
@@ -58,8 +71,8 @@ class _PaletteOption extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          width: 96,
-          padding: const EdgeInsets.all(AppSpacing.sm),
+          width: width,
+          padding: const EdgeInsets.all(AppSpacing.xs),
           decoration: BoxDecoration(
             color: isSelected
                 ? colors.primaryContainer
@@ -73,8 +86,8 @@ class _PaletteOption extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                width: 34,
-                height: 34,
+                width: 26,
+                height: 26,
                 decoration: BoxDecoration(
                   color: color,
                   shape: BoxShape.circle,
@@ -86,7 +99,11 @@ class _PaletteOption extends StatelessWidget {
                   ],
                 ),
                 child: isSelected
-                    ? const Icon(Icons.check_rounded, color: Colors.white)
+                    ? const Icon(
+                        Icons.check_rounded,
+                        color: Colors.white,
+                        size: 16,
+                      )
                     : null,
               ),
               const SizedBox(height: AppSpacing.xs),

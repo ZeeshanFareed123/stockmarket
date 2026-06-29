@@ -22,6 +22,15 @@ final class ServerFailure extends AppFailure {
       );
 }
 
+final class RateLimitFailure extends AppFailure {
+  const RateLimitFailure({super.cause})
+    : super(
+        code: 'rate_limit_failure',
+        message:
+            'Market data limit reached. Please wait a minute before retrying.',
+      );
+}
+
 final class ConfigurationFailure extends AppFailure {
   const ConfigurationFailure({required super.message, super.cause})
     : super(code: 'configuration_failure');

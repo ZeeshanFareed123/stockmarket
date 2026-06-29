@@ -16,6 +16,8 @@ final class TwelveDataWebSocketDataSource {
 
   static const _scope = 'market.websocket';
   static const _reconnectDelays = [1, 2, 4, 8, 16, 30];
+  static const _watchdogInterval = Duration(seconds: 15);
+  static const _watchdogTimeout = Duration(seconds: 35);
 
   final String _webSocketUrl;
   final String _apiKey;
@@ -27,7 +29,9 @@ final class TwelveDataWebSocketDataSource {
   WebSocketChannel? _channel;
   StreamSubscription<Object?>? _messageSubscription;
   Timer? _heartbeatTimer;
+  Timer? _watchdogTimer;
   Timer? _reconnectTimer;
+  DateTime? _lastMessageAt;
   Set<String> _desiredSymbols = {};
   Set<String> _subscribedSymbols = {};
   bool _shouldReconnect = false;
@@ -160,12 +164,14 @@ final class TwelveDataWebSocketDataSource {
       await channel.ready.timeout(const Duration(seconds: 15));
       _reconnectAttempt = 0;
       _isConnecting = false;
+      _lastMessageAt = DateTime.now();
       _emitStatus(
         const MarketStreamStatus(connection: MarketStreamConnection.connected),
       );
       AppLogger.info('Stream connected', scope: _scope);
       await _syncSubscriptions();
       _startHeartbeat();
+      _startWatchdog();
     } on Object catch (error, stackTrace) {
       _isConnecting = false;
       AppLogger.error(
@@ -218,6 +224,7 @@ final class TwelveDataWebSocketDataSource {
   }
 
   void _onMessage(Object? rawMessage) {
+    _lastMessageAt = DateTime.now();
     try {
       final decoded = jsonDecode(rawMessage.toString());
       if (decoded is! Map) {
@@ -236,11 +243,23 @@ final class TwelveDataWebSocketDataSource {
 
       final status = event['status']?.toString();
       if (status == 'error' || eventName == 'error') {
+        final message = event['message']?.toString() ?? '';
         AppLogger.warning(
           'Provider stream error event',
           scope: _scope,
           data: _safeEvent(event),
         );
+        if (_isApiLimitOrEntitlementMessage(message)) {
+          _shouldReconnect = false;
+          unawaited(
+            _disconnect(
+              status: MarketStreamStatus(
+                connection: MarketStreamConnection.failed,
+                message: _friendlyStreamMessage(message),
+              ),
+            ),
+          );
+        }
         return;
       }
 
@@ -280,8 +299,7 @@ final class TwelveDataWebSocketDataSource {
   }
 
   Future<void> _handleUnexpectedDisconnect(String message) async {
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = null;
+    _stopRealtimeTimers();
     await _messageSubscription?.cancel();
     _messageSubscription = null;
     _channel = null;
@@ -354,9 +372,34 @@ final class TwelveDataWebSocketDataSource {
     });
   }
 
+  void _startWatchdog() {
+    _watchdogTimer?.cancel();
+    _watchdogTimer = Timer.periodic(_watchdogInterval, (_) {
+      final lastMessageAt = _lastMessageAt;
+      if (lastMessageAt == null || _channel == null || _isConnecting) {
+        return;
+      }
+
+      final silence = DateTime.now().difference(lastMessageAt);
+      if (silence < _watchdogTimeout) {
+        return;
+      }
+
+      AppLogger.warning(
+        'Stream watchdog triggered reconnect',
+        scope: _scope,
+        data: {'silenceSeconds': silence.inSeconds},
+      );
+      unawaited(
+        _handleUnexpectedDisconnect(
+          'No market stream updates received. Reconnecting...',
+        ),
+      );
+    });
+  }
+
   Future<void> _disconnect({required MarketStreamStatus status}) async {
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = null;
+    _stopRealtimeTimers();
     await _messageSubscription?.cancel();
     _messageSubscription = null;
     final channel = _channel;
@@ -365,6 +408,14 @@ final class TwelveDataWebSocketDataSource {
     _subscribedSymbols = {};
     await channel?.sink.close();
     _emitStatus(status);
+  }
+
+  void _stopRealtimeTimers() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+    _watchdogTimer?.cancel();
+    _watchdogTimer = null;
+    _lastMessageAt = null;
   }
 
   void _cancelReconnect() {
@@ -395,5 +446,29 @@ final class TwelveDataWebSocketDataSource {
       if (event['success'] != null) 'success': event['success'],
       if (event['fails'] != null) 'fails': event['fails'],
     };
+  }
+
+  bool _isApiLimitOrEntitlementMessage(String message) {
+    final lowerMessage = message.toLowerCase();
+    return lowerMessage.contains('limit') ||
+        lowerMessage.contains('credits') ||
+        lowerMessage.contains('apikey') ||
+        lowerMessage.contains('api key') ||
+        lowerMessage.contains('entitlement') ||
+        lowerMessage.contains('plan');
+  }
+
+  String _friendlyStreamMessage(String message) {
+    final lowerMessage = message.toLowerCase();
+    if (lowerMessage.contains('limit') || lowerMessage.contains('credits')) {
+      return 'Market data stream limit reached. Please wait before retrying.';
+    }
+    if (lowerMessage.contains('apikey') || lowerMessage.contains('api key')) {
+      return 'Market data API key is missing, expired, or not allowed.';
+    }
+    if (lowerMessage.contains('plan') || lowerMessage.contains('entitlement')) {
+      return 'This API plan does not allow the requested live stream.';
+    }
+    return message.isEmpty ? 'Market data stream failed.' : message;
   }
 }

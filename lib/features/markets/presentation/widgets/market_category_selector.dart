@@ -18,64 +18,74 @@ class MarketCategorySelector extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
+    final labelStyle = theme.textTheme.titleSmall;
+
     return Container(
-      height: 58,
-      padding: const EdgeInsets.all(AppSpacing.xs),
+      padding: const EdgeInsets.all(AppSpacing.xxs),
       decoration: BoxDecoration(
         color: colors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppRadius.large),
         border: Border.all(color: colors.outline),
       ),
-      child: ListView.separated(
+      child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        itemCount: MarketCategory.values.length,
-        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
-        itemBuilder: (context, index) {
-          final category = MarketCategory.values[index];
-          final isSelected = category == selected;
+        child: Row(
+          children: [
+            for (final category in MarketCategory.values) ...[
+              Builder(
+                builder: (context) {
+                  final isSelected = category == selected;
+                  final foreground = isSelected
+                      ? colors.primary
+                      : colors.onSurfaceVariant;
 
-          return InkWell(
-            borderRadius: BorderRadius.circular(AppRadius.medium),
-            onTap: () => onSelected(category),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? colors.primaryContainer
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(AppRadius.medium),
-              ),
-              child: Row(
-                children: [
-                  if (category == MarketCategory.popular) ...[
-                    Icon(
-                      Icons.star_outline_rounded,
-                      color: isSelected
-                          ? colors.primary
-                          : colors.onSurfaceVariant,
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(AppRadius.medium),
+                    onTap: () => onSelected(category),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? colors.primaryContainer
+                            : colors.primaryContainer.withValues(alpha: 0),
+                        borderRadius: BorderRadius.circular(AppRadius.medium),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          if (category == MarketCategory.popular) ...[
+                            Icon(
+                              Icons.star_outline_rounded,
+                              size: (labelStyle?.fontSize ?? 14) + 2,
+                              color: foreground,
+                            ),
+                            const SizedBox(width: AppSpacing.xxs),
+                          ],
+                          Text(
+                            category.label,
+                            style: labelStyle?.copyWith(
+                              color: foreground,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: AppSpacing.xs),
-                  ],
-                  Text(
-                    category.label,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: isSelected
-                          ? colors.primary
-                          : colors.onSurfaceVariant,
-                      fontWeight: isSelected
-                          ? FontWeight.w700
-                          : FontWeight.w500,
-                    ),
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
-          );
-        },
+              if (category != MarketCategory.values.last)
+                const SizedBox(width: AppSpacing.xxs),
+            ],
+          ],
+        ),
       ),
     );
   }

@@ -10,7 +10,7 @@ class MarketSparkline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 48,
+      height: 40,
       child: CustomPaint(
         painter: _SparklinePainter(values: values, color: color),
       ),
@@ -36,34 +36,56 @@ class _SparklinePainter extends CustomPainter {
     final minValue = points.reduce((a, b) => a < b ? a : b);
     final maxValue = points.reduce((a, b) => a > b ? a : b);
     final range = maxValue - minValue;
-    final path = Path();
+    final offsets = <Offset>[];
 
     for (var index = 0; index < points.length; index++) {
       final x = points.length == 1
           ? size.width
           : index / (points.length - 1) * size.width;
       final normalized = range == 0 ? 0.5 : (points[index] - minValue) / range;
-      final y = size.height - (normalized * (size.height - 10)) - 5;
-
-      if (index == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
+      final y = size.height - (normalized * (size.height - 18)) - 9;
+      offsets.add(Offset(x, y));
     }
+
+    final path = _buildSmoothPath(offsets);
+    final fillPath = Path.from(path)
+      ..lineTo(offsets.last.dx, size.height)
+      ..lineTo(offsets.first.dx, size.height)
+      ..close();
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [color.withValues(alpha: 0.18), color.withValues(alpha: 0)],
+      ).createShader(Offset.zero & size)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(fillPath, fillPaint);
 
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 2
+      ..strokeWidth = 1.7
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
     canvas.drawPath(path, paint);
 
-    final lastX = points.length == 1 ? size.width : size.width;
-    final lastNormalized = range == 0 ? 0.5 : (points.last - minValue) / range;
-    final lastY = size.height - (lastNormalized * (size.height - 10)) - 5;
-    canvas.drawCircle(Offset(lastX, lastY), 4, Paint()..color = color);
+    canvas.drawCircle(offsets.last, 3.5, Paint()..color = color);
+  }
+
+  Path _buildSmoothPath(List<Offset> offsets) {
+    final path = Path()..moveTo(offsets.first.dx, offsets.first.dy);
+    if (offsets.length == 1) {
+      return path;
+    }
+
+    for (var index = 0; index < offsets.length - 1; index++) {
+      final current = offsets[index];
+      final next = offsets[index + 1];
+      final controlX = (current.dx + next.dx) / 2;
+      path.cubicTo(controlX, current.dy, controlX, next.dy, next.dx, next.dy);
+    }
+
+    return path;
   }
 
   @override

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stockubl/app/theme/app_spacing.dart';
 
 class ThemeModeSelector extends StatelessWidget {
   const ThemeModeSelector({
@@ -13,22 +14,17 @@ class ThemeModeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SegmentedButton<ThemeMode>(
+      style: SegmentedButton.styleFrom(
+        visualDensity: VisualDensity.compact,
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+      ),
       segments: const [
         ButtonSegment(
           value: ThemeMode.system,
-          icon: Icon(Icons.brightness_auto_outlined),
-          label: Text('System'),
+          label: Text('System', maxLines: 1),
         ),
-        ButtonSegment(
-          value: ThemeMode.light,
-          icon: Icon(Icons.light_mode_outlined),
-          label: Text('Light'),
-        ),
-        ButtonSegment(
-          value: ThemeMode.dark,
-          icon: Icon(Icons.dark_mode_outlined),
-          label: Text('Dark'),
-        ),
+        ButtonSegment(value: ThemeMode.light, label: Text('Light', maxLines: 1)),
+        ButtonSegment(value: ThemeMode.dark, label: Text('Dark', maxLines: 1)),
       ],
       selected: {value},
       showSelectedIcon: false,

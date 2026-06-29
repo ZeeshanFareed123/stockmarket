@@ -75,8 +75,37 @@ void _throwIfProviderError(Map<String, Object?> json) {
   }
 
   throw ProviderFailure(
-    message: _optionalString(json, 'message', fallback: 'Provider error.'),
+    message: _friendlyProviderMessage(json),
   );
+}
+
+String _friendlyProviderMessage(Map<String, Object?> json) {
+  final rawMessage = _optionalString(
+    json,
+    'message',
+    fallback: 'Provider error.',
+  );
+  final code = json['code']?.toString().trim().toLowerCase() ?? '';
+  final message = rawMessage.toLowerCase();
+
+  if (code == '429' ||
+      message.contains('limit') ||
+      message.contains('credits') ||
+      message.contains('rate')) {
+    return 'Market data limit reached. Please wait a minute before retrying.';
+  }
+
+  if (message.contains('apikey') ||
+      message.contains('api key') ||
+      message.contains('unauthorized')) {
+    return 'Market data API key is missing, expired, or not allowed.';
+  }
+
+  if (message.contains('symbol')) {
+    return 'This market symbol is not available from the data provider.';
+  }
+
+  return rawMessage;
 }
 
 String _requiredString(Map<String, Object?> json, String key) {
